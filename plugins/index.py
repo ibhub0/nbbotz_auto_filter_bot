@@ -168,7 +168,7 @@ async def handle_index_request(bot, message):
             f'From: {message.from_user.mention} (<code>{message.from_user.id}</code>)\n'
             f'Chat: <code>{chat_id}</code>\n'
             f'Last Msg ID: <code>{last_msg_id}</code>\n'
-            f'Link: {invite_link}',
+            f'InviteLink: {invite_link}',
             reply_markup=InlineKeyboardMarkup(buttons)
         )
         await message.reply('Request submitted. Waiting for moderator approval.')
@@ -298,11 +298,13 @@ async def index_files_to_db(lst_msg_id, chat_id, status_msg, bot):
                     except Exception as e:
                         logger.error(f"Message processing error: {e}")
                         stats['errors'] += 1
+                        continue
 
                 results = await asyncio.gather(*save_tasks, return_exceptions=True)
                 for result in results:
                     if isinstance(result, Exception):
                         stats['errors'] += 1
+                        logger.error(f"Error saving file: {result}")
                     else:
                         ok, code = result
                         if ok:
@@ -319,11 +321,11 @@ async def index_files_to_db(lst_msg_id, chat_id, status_msg, bot):
             elapsed = time.time() - start_time
             await status_msg.edit(
                 f"✅ Indexing Completed!\n"
-                f"• Total Messages: {total_messages}\n"
-                f"• Saved: {stats['saved']}\n"
-                f"• Duplicates: {stats['duplicate']}\n"
-                f"• Errors: {stats['errors']}\n"
-                f"⏱ Elapsed: {get_readable_time(elapsed)}",
+                f"• Total Messages: <code>{total_messages}</code>\n"
+                f"• Saved: <code>{stats['saved']}</code>\n"
+                f"• Duplicates: <code>{stats['duplicate']}</code>\n"
+                f"• Errors: <code>{stats['errors']}</code>\n"
+                f"⏱ Elapsed: <code>{get_readable_time(elapsed)}</code>",
                 reply_markup=InlineKeyboardMarkup(
                     [[InlineKeyboardButton('Close', callback_data='close_data')]]
                 )
